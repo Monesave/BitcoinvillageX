@@ -1,0 +1,20 @@
+import { Outlet } from 'react-router-dom';
+import Header from './Header';
+import Footer from './Footer';
+import BottomNavigation from './BottomNavigation';
+
+const Layout = () => {
+  return (
+    <div className="min-h-screen flex flex-col relative">
+      <Header />
+      <main className="flex-grow">
+        <Outlet />
+      </main>
+      <Footer />
+      <BottomNavigation />
+    </div>
+  );
+};
+
+export default Layout;
+

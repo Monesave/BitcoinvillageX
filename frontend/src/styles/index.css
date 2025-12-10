@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-slate-700;
+  }
+  
+  body {
+    @apply bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 text-gray-100 antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-6 py-3 rounded-xl font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900;
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-r from-bitcoin to-orange-500 text-white hover:from-orange-500 hover:to-bitcoin focus:ring-bitcoin shadow-lg shadow-bitcoin/50 hover:shadow-xl hover:shadow-bitcoin/60;
+  }
+  
+  .btn-secondary {
+    @apply bg-slate-800/50 backdrop-blur-sm text-gray-100 border border-slate-700 hover:bg-slate-700/50 focus:ring-slate-600;
+  }
+  
+  .btn-outline {
+    @apply border-2 border-bitcoin/50 text-bitcoin bg-transparent hover:bg-bitcoin/10 hover:border-bitcoin focus:ring-bitcoin;
+  }
+  
+  .input {
+    @apply w-full px-4 py-3 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bitcoin/50 focus:border-bitcoin/50 transition-all;
+  }
+  
+  .card {
+    @apply bg-slate-800/40 backdrop-blur-md rounded-2xl shadow-xl border border-slate-700/50 p-6 hover:border-slate-600/50 transition-all;
+  }
+  
+  .card-glass {
+    @apply bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/30 p-6 hover:border-bitcoin/30 hover:shadow-bitcoin/10 transition-all duration-300;
+  }
+  
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-bitcoin via-orange-400 to-yellow-400 bg-clip-text text-transparent;
+  }
+  
+  .glow-effect {
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.3);
+  }
+  
+  .glow-effect-hover:hover {
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.5);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .glass-effect {
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  
+  .blockchain-grid {
+    background-image: 
+      linear-gradient(rgba(247, 147, 26, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(247, 147, 26, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+}
+
