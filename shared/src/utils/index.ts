@@ -38,11 +38,13 @@ export function formatBtc(btc: number): string {
 }
 
 // Commission Calculation
-export function calculateCommission(amountSats: number, feePercentage: number = 2.5): number {
+export const PLATFORM_FEE_PERCENTAGE = 2.5;
+
+export function calculateCommission(amountSats: number, feePercentage: number = PLATFORM_FEE_PERCENTAGE): number {
   return Math.round((amountSats * feePercentage) / 100);
 }
 
-export function calculateNetAmount(amountSats: number, feePercentage: number = 2.5): number {
+export function calculateNetAmount(amountSats: number, feePercentage: number = PLATFORM_FEE_PERCENTAGE): number {
   const commission = calculateCommission(amountSats, feePercentage);
   return amountSats - commission;
 }

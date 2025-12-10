@@ -299,11 +299,12 @@ After the initial deployment completes:
    - Click **"Change"** and set to: `backend`
    - Click **"Save"**
 
-4. **Configure Build Settings** (if needed):
+4. **Configure Build Settings**:
    - Go to **Settings** → **Deploy**
-   - **Start Command**: Should be `npm start` (Railway auto-detects)
-   - If using TypeScript build, it should be: `node dist/server.js`
-   - Railway will automatically run `npm install` and `npm run build` if `build` script exists
+   - **Start Command**: `npm start` (uses `tsx` to run TypeScript directly without compilation)
+   - Railway will automatically run `npm install` and `npm run build`
+   - **Note**: The backend is configured to use `tsx` at runtime instead of compiling TypeScript. This is a temporary workaround until database types are fully generated from Supabase. The code will run correctly despite TypeScript type warnings.
+   - **Important**: Make sure `tsx` is in `dependencies` (not just `devDependencies`) for Railway deployment.
 
 ### 2.2: Add Environment Variables
 
