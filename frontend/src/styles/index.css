@@ -81,5 +81,13 @@
       linear-gradient(90deg, rgba(247, 147, 26, 0.1) 1px, transparent 1px);
     background-size: 50px 50px;
   }
+  
+  .galaxy-bg {
+    background: 
+      radial-gradient(ellipse at top, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
+      radial-gradient(ellipse at left, rgba(236, 72, 153, 0.2) 0%, transparent 50%),
+      linear-gradient(180deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+  }
 }
 

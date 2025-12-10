@@ -20,6 +20,14 @@ build/
 .next/
 out/
 *.tsbuildinfo
+*.js.map
+*.d.ts.map
+
+# Compiled TypeScript outputs (keep .ts source files)
+shared/src/**/*.js
+shared/src/**/*.d.ts
+!shared/src/**/*.test.js
+!shared/src/**/*.spec.js
 
 # IDE
 .vscode/

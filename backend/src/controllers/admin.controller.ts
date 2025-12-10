@@ -25,8 +25,8 @@ export const moderateContent = async (req: Request, res: Response, next: NextFun
     }
 
     // Log moderation action
-    const { error: logError } = await supabase
-      .from('moderation_logs')
+    const { error: logError } = await (supabase
+      .from('moderation_logs') as any)
       .insert({
         moderator_id: req.user.id,
         content_type: contentType,
@@ -50,13 +50,13 @@ export const moderateContent = async (req: Request, res: Response, next: NextFun
             .delete()
             .eq('id', contentId);
         } else if (action === 'hide') {
-          updateResult = await supabase
-            .from('marketplace_listings')
+          updateResult = await (supabase
+            .from('marketplace_listings') as any)
             .update({ is_active: false })
             .eq('id', contentId);
         } else if (action === 'approve') {
-          updateResult = await supabase
-            .from('marketplace_listings')
+          updateResult = await (supabase
+            .from('marketplace_listings') as any)
             .update({ is_active: true })
             .eq('id', contentId);
         }
@@ -69,13 +69,13 @@ export const moderateContent = async (req: Request, res: Response, next: NextFun
             .delete()
             .eq('id', contentId);
         } else if (action === 'hide') {
-          updateResult = await supabase
-            .from('service_listings')
+          updateResult = await (supabase
+            .from('service_listings') as any)
             .update({ is_active: false })
             .eq('id', contentId);
         } else if (action === 'approve') {
-          updateResult = await supabase
-            .from('service_listings')
+          updateResult = await (supabase
+            .from('service_listings') as any)
             .update({ is_active: true })
             .eq('id', contentId);
         }
@@ -88,8 +88,8 @@ export const moderateContent = async (req: Request, res: Response, next: NextFun
             .delete()
             .eq('id', contentId);
         } else if (action === 'hide') {
-          updateResult = await supabase
-            .from('bounties')
+          updateResult = await (supabase
+            .from('bounties') as any)
             .update({ status: 'closed' })
             .eq('id', contentId);
         }
@@ -102,18 +102,18 @@ export const moderateContent = async (req: Request, res: Response, next: NextFun
             .delete()
             .eq('id', contentId);
         } else if (action === 'hide') {
-          updateResult = await supabase
-            .from('campaigns')
+          updateResult = await (supabase
+            .from('campaigns') as any)
             .update({ status: 'closed' })
             .eq('id', contentId);
         } else if (action === 'feature') {
-          updateResult = await supabase
-            .from('campaigns')
+          updateResult = await (supabase
+            .from('campaigns') as any)
             .update({ is_featured: true })
             .eq('id', contentId);
         } else if (action === 'unfeature') {
-          updateResult = await supabase
-            .from('campaigns')
+          updateResult = await (supabase
+            .from('campaigns') as any)
             .update({ is_featured: false })
             .eq('id', contentId);
         }
@@ -143,8 +143,8 @@ export const moderateContent = async (req: Request, res: Response, next: NextFun
     }
 
     // Log admin action
-    await supabase
-      .from('admin_actions')
+    await (supabase
+      .from('admin_actions') as any)
       .insert({
         admin_id: req.user.id,
         action_type: `moderate_${action}`,
@@ -368,8 +368,8 @@ export const banUser = async (req: Request, res: Response, next: NextFunction) =
     // For now, we'll log it and potentially add a banned field to profiles
     
     // Log admin action
-    await supabase
-      .from('admin_actions')
+    await (supabase
+      .from('admin_actions') as any)
       .insert({
         admin_id: req.user.id,
         action_type: 'ban_user',
@@ -382,8 +382,8 @@ export const banUser = async (req: Request, res: Response, next: NextFunction) =
       });
 
     // Log moderation action
-    await supabase
-      .from('moderation_logs')
+    await (supabase
+      .from('moderation_logs') as any)
       .insert({
         moderator_id: req.user.id,
         content_type: 'user',
@@ -433,7 +433,7 @@ export const getPlatformStats = async (req: Request, res: Response, next: NextFu
       .select('amount_sats, status')
       .eq('status', 'completed');
 
-    const totalVolume = transactions?.reduce((sum, tx) => sum + (tx.amount_sats || 0), 0) || 0;
+    const totalVolume = transactions?.reduce((sum, tx: any) => sum + (tx.amount_sats || 0), 0) || 0;
 
     // Get content counts
     const { count: marketplaceListings } = await supabase
@@ -589,8 +589,8 @@ export const nominateCouncilMember = async (req: Request, res: Response, next: N
     }
 
     // Create council member application
-    const { data: application, error } = await supabase
-      .from('council_members')
+    const { data: application, error } = await (supabase
+      .from('council_members') as any)
       .insert({
         user_id: userId,
         status: 'pending',
@@ -613,13 +613,13 @@ export const nominateCouncilMember = async (req: Request, res: Response, next: N
     }
 
     // Log admin action
-    await supabase
-      .from('admin_actions')
+    await (supabase
+      .from('admin_actions') as any)
       .insert({
         admin_id: req.user.id,
         action_type: 'nominate_council_member',
         target_type: 'council_member',
-        target_id: application.id,
+        target_id: (application as any)?.id,
         description: `Nominated user for council membership`,
         metadata: { userId, notes },
       });
@@ -722,7 +722,7 @@ export const reviewCouncilApplication = async (req: Request, res: Response, next
       throw new AppError('Council application not found', 404, 'APPLICATION_NOT_FOUND');
     }
 
-    if (application.status !== 'pending') {
+    if ((application as any)?.status !== 'pending') {
       throw new AppError('Application already reviewed', 400, 'ALREADY_REVIEWED');
     }
 
@@ -738,8 +738,8 @@ export const reviewCouncilApplication = async (req: Request, res: Response, next
       updates.term_end_date = termEndDate ? new Date(termEndDate).toISOString() : null;
     }
 
-    const { data: updated, error: updateError } = await supabase
-      .from('council_members')
+    const { data: updated, error: updateError } = await (supabase
+      .from('council_members') as any)
       .update(updates)
       .eq('id', id)
       .select(`
@@ -763,8 +763,8 @@ export const reviewCouncilApplication = async (req: Request, res: Response, next
     }
 
     // Log admin action
-    await supabase
-      .from('admin_actions')
+    await (supabase
+      .from('admin_actions') as any)
       .insert({
         admin_id: req.user.id,
         action_type: `council_application_${action}`,
@@ -810,7 +810,7 @@ export const deactivateCouncilMember = async (req: Request, res: Response, next:
       throw new AppError('Council member not found', 404, 'COUNCIL_MEMBER_NOT_FOUND');
     }
 
-    if (member.status !== 'active') {
+    if ((member as any)?.status !== 'active') {
       throw new AppError('Council member is not active', 400, 'NOT_ACTIVE');
     }
 
@@ -836,8 +836,8 @@ export const deactivateCouncilMember = async (req: Request, res: Response, next:
     }
 
     // Log admin action
-    await supabase
-      .from('admin_actions')
+    await (supabase
+      .from('admin_actions') as any)
       .insert({
         admin_id: req.user.id,
         action_type: 'deactivate_council_member',

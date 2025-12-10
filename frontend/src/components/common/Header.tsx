@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import ContactSupport from './ContactSupport';
 
 const Header = () => {
   const { user, logout } = useAuthStore();
@@ -41,6 +42,7 @@ const Header = () => {
 
           {/* Desktop Auth Section */}
           <div className="hidden lg:flex items-center space-x-4">
+            <ContactSupport />
             {user ? (
               <>
                 <Link to="/dashboard" className="text-gray-300 hover:text-bitcoin transition-colors font-medium">
@@ -69,14 +71,17 @@ const Header = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden text-gray-300 hover:text-bitcoin transition-colors p-2"
-            aria-label="Toggle menu"
-          >
-            <span className="text-2xl">{isMobileMenuOpen ? '✕' : '☰'}</span>
-          </button>
+          {/* Mobile Menu Button & Contact */}
+          <div className="lg:hidden flex items-center space-x-2">
+            <ContactSupport />
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-gray-300 hover:text-bitcoin transition-colors p-2"
+              aria-label="Toggle menu"
+            >
+              <span className="text-2xl">{isMobileMenuOpen ? '✕' : '☰'}</span>
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}

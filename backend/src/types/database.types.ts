@@ -32,6 +32,101 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['profiles']['Row'], 'created_at' | 'updated_at'>;
         Update: Partial<Database['public']['Tables']['profiles']['Insert']>;
       };
+      moderation_logs: {
+        Row: {
+          id: string;
+          moderator_id: string;
+          content_type: string;
+          content_id: string;
+          action: string;
+          reason: string | null;
+          created_at: string;
+        };
+        Insert: {
+          moderator_id: string;
+          content_type: string;
+          content_id: string;
+          action: string;
+          reason?: string | null;
+        };
+        Update: Partial<{
+          moderator_id: string;
+          content_type: string;
+          content_id: string;
+          action: string;
+          reason: string | null;
+        }>;
+      };
+      admin_actions: {
+        Row: {
+          id: string;
+          admin_id: string;
+          action_type: string;
+          target_type: string | null;
+          target_id: string | null;
+          details: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          admin_id: string;
+          action_type: string;
+          target_type?: string | null;
+          target_id?: string | null;
+          details?: Json | null;
+        };
+        Update: Partial<{
+          admin_id: string;
+          action_type: string;
+          target_type: string | null;
+          target_id: string | null;
+          details: Json | null;
+        }>;
+      };
+      marketplace_listings: {
+        Row: {
+          id: string;
+          is_active: boolean;
+          [key: string]: any;
+        };
+        Insert: Record<string, any>;
+        Update: Record<string, any>;
+      };
+      service_listings: {
+        Row: {
+          id: string;
+          is_active: boolean;
+          [key: string]: any;
+        };
+        Insert: Record<string, any>;
+        Update: Record<string, any>;
+      };
+      bounties: {
+        Row: {
+          id: string;
+          status: string;
+          [key: string]: any;
+        };
+        Insert: Record<string, any>;
+        Update: Record<string, any>;
+      };
+      campaigns: {
+        Row: {
+          id: string;
+          status: string;
+          is_featured: boolean;
+          [key: string]: any;
+        };
+        Insert: Record<string, any>;
+        Update: Record<string, any>;
+      };
+      reviews: {
+        Row: {
+          id: string;
+          [key: string]: any;
+        };
+        Insert: Record<string, any>;
+        Update: Record<string, any>;
+      };
       // Add more table types as needed
     };
     Views: {

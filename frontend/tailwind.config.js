@@ -40,11 +40,27 @@ export default {
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'glow': 'glow 2s ease-in-out infinite alternate',
+        'float': 'float 6s ease-in-out infinite',
+        'twinkle': 'twinkle 3s ease-in-out infinite',
+        'fade-in': 'fadeIn 0.2s ease-out',
       },
       keyframes: {
         glow: {
           '0%': { boxShadow: '0 0 5px rgba(247, 147, 26, 0.5)' },
           '100%': { boxShadow: '0 0 20px rgba(247, 147, 26, 0.8), 0 0 30px rgba(247, 147, 26, 0.4)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px) translateX(0px)' },
+          '33%': { transform: 'translateY(-20px) translateX(10px)' },
+          '66%': { transform: 'translateY(10px) translateX(-10px)' },
+        },
+        twinkle: {
+          '0%, 100%': { opacity: 0.3 },
+          '50%': { opacity: 1 },
+        },
+        fadeIn: {
+          '0%': { opacity: 0, transform: 'translateY(-10px)' },
+          '100%': { opacity: 1, transform: 'translateY(0)' },
         },
       },
     },
