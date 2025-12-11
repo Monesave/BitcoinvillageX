@@ -299,12 +299,26 @@ After the initial deployment completes:
    - Click **"Change"** and set to: `backend`
    - Click **"Save"**
 
-4. **Configure Build Settings**:
+4. **Configure Build Settings** (IMPORTANT - Fix for workspace errors):
+   
+   **Option 1: Use nixpacks.toml (Recommended - Already configured)**
+   - The `backend/nixpacks.toml` file has been created to override Railway's auto-detection
+   - With Root Directory set to `backend`, Railway will use this config file
+   - No additional configuration needed - just ensure Root Directory is set to `backend`
+   
+   **Option 2: Manual Override (If Option 1 doesn't work)**
    - Go to **Settings** → **Deploy**
+   - **Build Command**: **Override with**: `npm install && npm run build`
    - **Start Command**: `npm start` (uses `tsx` to run TypeScript directly without compilation)
-   - Railway will automatically run `npm install` and `npm run build`
-   - **Note**: The backend is configured to use `tsx` at runtime instead of compiling TypeScript. This is a temporary workaround until database types are fully generated from Supabase. The code will run correctly despite TypeScript type warnings.
-   - **Important**: Make sure `tsx` is in `dependencies` (not just `devDependencies`) for Railway deployment.
+   
+   **Note**: The backend is configured to use `tsx` at runtime instead of compiling TypeScript. This is a temporary workaround until database types are fully generated from Supabase. The code will run correctly despite TypeScript type warnings.
+   
+   **Important**: Make sure `tsx` is in `dependencies` (not just `devDependencies`) for Railway deployment.
+
+   **Why this fixes the workspace error:**
+   - Railway's Nixpacks builder scans the repository and detects the root `package.json` with workspaces
+   - The `backend/nixpacks.toml` file tells Railway to ignore workspace detection and build directly from the backend directory
+   - This ensures Railway runs `npm install` and `npm run build` from the backend folder, not from the root
 
 ### 2.2: Add Environment Variables
 
