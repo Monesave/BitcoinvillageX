@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { lightningService } from '../services/lightning.service';
 import { supabase } from '../services/supabase';
-import { AppError } from '@bitcoinvillagex/shared';
+import { AppError } from '../../shared/src/utils';;
 
 // Create Lightning invoice
 export const createInvoice = async (req: Request, res: Response, next: NextFunction) => {

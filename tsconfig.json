@@ -29,7 +29,6 @@
       "@backend/*": ["backend/src/*"]
     }
   },
-  "files": [],
   "include": [],
   "exclude": ["node_modules", "dist", "build", "frontend", "backend", "shared"]
 }

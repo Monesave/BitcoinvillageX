@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { supabase } from '../services/supabase';
-import { AppError } from '@bitcoinvillagex/shared';
+import { AppError } from '../../shared/src/utils';;
 
 // Extend Express Request to include user
 declare global {

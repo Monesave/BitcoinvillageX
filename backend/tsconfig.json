@@ -24,7 +24,6 @@
     "declaration": false,
     "declarationMap": false,
     "sourceMap": true,
-    "suppressImplicitAnyIndexErrors": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
