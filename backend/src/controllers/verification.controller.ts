@@ -3,7 +3,7 @@ import { supabase } from '../services/supabase';
 import { veriffService } from '../services/veriff.service';
 import { lightningService } from '../services/lightning.service';
 import { strikeService } from '../services/strike.service';
-import { AppError, usdToSats } from '../../../shared/src/utils';
+import { AppError, usdToSats } from '@bitcoinvillagex/shared';
 
 // Request verification (step 1: create verification session and payment invoice)
 export const requestVerification = async (req: Request, res: Response, next: NextFunction) => {

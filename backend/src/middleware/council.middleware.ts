@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { supabase } from '../services/supabase';
-import { AppError } from '../../../shared/src/utils';
+import { AppError } from '@bitcoinvillagex/shared';
 
 /**
  * Middleware to check if user is an active council member

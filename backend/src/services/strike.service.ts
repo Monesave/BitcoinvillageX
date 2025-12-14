@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AppError } from '../../../shared/src/utils';
+import { AppError } from '@bitcoinvillagex/shared';
 import dotenv from 'dotenv';
 
 interface StrikeInvoice {

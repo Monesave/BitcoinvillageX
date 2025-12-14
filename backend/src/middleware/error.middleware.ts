@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from '../../../shared/src/utils';
+import { AppError } from '@bitcoinvillagex/shared';
 
 export const errorHandler = (
   err: Error | AppError,

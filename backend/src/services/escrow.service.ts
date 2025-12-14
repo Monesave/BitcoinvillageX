@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { calculateCommission, calculateNetAmount, PLATFORM_FEE_PERCENTAGE, AppError } from '../../../shared/src/utils';
+import { calculateCommission, calculateNetAmount, PLATFORM_FEE_PERCENTAGE, AppError } from '@bitcoinvillagex/shared';
 
 interface CreateEscrowParams {
   buyerId: string;

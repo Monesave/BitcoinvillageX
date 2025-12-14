@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { supabase } from '../services/supabase';
-import { AppError } from '../../../shared/src/utils';
+import { AppError } from '@bitcoinvillagex/shared';
 
 // Register with email/password
 export const register = async (req: Request, res: Response, next: NextFunction) => {

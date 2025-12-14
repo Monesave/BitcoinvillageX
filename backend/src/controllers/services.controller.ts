@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { supabase } from '../services/supabase';
 import { createEscrow, releaseEscrow, refundEscrow } from '../services/escrow.service';
-import { AppError } from '../../../shared/src/utils';
+import { AppError } from '@bitcoinvillagex/shared';
 
 // ============================================================================
 // SERVICE LISTINGS
