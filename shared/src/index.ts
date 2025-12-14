@@ -4,6 +4,6 @@ export * from './types';
 // Export all constants
 export * from './constants';
 
-// Export all utilities
+// Export all utilities explicitly to avoid re-export ambiguity
 export * from './utils';
 

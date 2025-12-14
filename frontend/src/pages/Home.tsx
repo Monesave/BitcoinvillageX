@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import StarField from '../components/common/StarField';
-import Footer from '@/components/common/Footer';
 
 const Home = () => {
   const { user } = useAuthStore();

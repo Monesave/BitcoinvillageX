@@ -1,3 +1,6 @@
+// Commission Calculation
+import { PLATFORM_FEE_PERCENTAGE } from '../constants';
+
 // Bitcoin Utilities
 export function satsToBtc(sats: number): number {
   return sats / 100_000_000;
@@ -38,8 +41,6 @@ export function formatBtc(btc: number): string {
 }
 
 // Commission Calculation
-export const PLATFORM_FEE_PERCENTAGE = 2.5;
-
 export function calculateCommission(amountSats: number, feePercentage: number = PLATFORM_FEE_PERCENTAGE): number {
   return Math.round((amountSats * feePercentage) / 100);
 }

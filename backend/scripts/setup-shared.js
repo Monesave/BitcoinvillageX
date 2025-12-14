@@ -225,13 +225,13 @@ export function errorResponse(message: string, code?: string) {
   fs.writeFileSync(path.join(constantsDir, 'index.ts'), '// Constants exports\n');
   
   // Create minimal src/index.ts
-  const indexContent = `// Export all types
+  const indexContent = `
 export * from './types';
 
-// Export all constants
+
 export * from './constants';
 
-// Export all utilities
+
 export * from './utils';
 `;
   fs.writeFileSync(path.join(srcDir, 'index.ts'), indexContent);
