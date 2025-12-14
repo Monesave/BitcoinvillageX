@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLightning } from '../../hooks/useLightning';
-import { formatSats } from '../../../../shared/src/utils';
+import { formatSats } from '@shared/utils';
 
 interface LightningPaymentProps {
   amountSats: number;
