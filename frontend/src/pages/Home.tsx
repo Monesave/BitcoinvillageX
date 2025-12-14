@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import StarField from '../components/common/StarField';
+import Footer from '@/components/common/Footer';
 
 const Home = () => {
   const { user } = useAuthStore();
@@ -11,7 +12,7 @@ const Home = () => {
       <StarField />
       
       {/* Galaxy/Nebula Gradient Overlay */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
+       {/* <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-purple-900/30 to-slate-900"></div>
         <div 
           className="absolute inset-0 opacity-60"
@@ -31,7 +32,7 @@ const Home = () => {
             background: 'radial-gradient(ellipse at 50% 50%, rgba(190, 24, 93, 0.2) 0%, transparent 50%)',
           }}
         ></div>
-      </div>
+      </div>  */}
 
       {/* Hero Section */}
       <section className="relative z-10 min-h-screen flex items-center justify-center py-20 px-4 sm:px-6 lg:px-8">
@@ -233,13 +234,17 @@ const Home = () => {
       </section>
 
       {/* Footer Message */}
-      <footer className="relative z-10 py-12 px-4 sm:px-6 lg:px-8 border-t border-slate-700/30">
-        <div className="container mx-auto text-center">
+      {/* <footer className="relative z-10 py-12 px-4 sm:px-6 lg:px-8 border-t border-slate-700/30"> */}
+        {/* <div className="container mx-auto text-center">
           <p className="text-lg sm:text-xl md:text-2xl text-gray-300 font-medium italic">
             We are all created equal, no inflation, no printing
           </p>
-        </div>
-      </footer>
+        </div> */}
+      {/* </footer> */}
+
+{/* <div className='z-10'>
+      <Footer />
+      </div> */}
     </div>
   );
 };

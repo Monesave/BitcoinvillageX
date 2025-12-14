@@ -42,8 +42,7 @@ const StarField = () => {
 
     // Animation loop
     const animate = () => {
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.1)'; // Very subtle fade
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas for transparent background
 
       stars.forEach((star) => {
         // Update position
@@ -88,7 +87,7 @@ const StarField = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0"
+      className="fixed inset-0 pointer-events-none z-0 bg-none"
       style={{ background: 'transparent' }}
     />
   );

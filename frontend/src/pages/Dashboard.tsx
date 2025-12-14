@@ -23,14 +23,28 @@ const Dashboard = () => {
 
     try {
       // Load profile
-      const { data: profileData } = await supabase
+      const { data } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
 
-      if (profileData) {
-        setProfile(profileData as Profile);
+      if (data) {
+        const profileData = data as any;
+        setProfile({
+          id: profileData.id,
+          username: profileData.username,
+          displayName: profileData.display_name,
+          bio: profileData.bio,
+          location: profileData.location,
+          avatarUrl: profileData.avatar_url,
+          isVerifiedVillager: profileData.is_verified_villager,
+          reputationScore: profileData.reputation_score,
+          totalTransactions: profileData.total_transactions,
+          totalVolumeSats: profileData.total_volume_sats,
+          createdAt: profileData.created_at,
+          updatedAt: profileData.updated_at,
+        } as Profile);
       }
 
       // Load wallet
@@ -41,7 +55,16 @@ const Dashboard = () => {
         .single();
 
       if (walletData) {
-        setWallet(walletData as Wallet);
+        const _walletData = walletData as any;
+        setWallet({
+          id: _walletData.id,
+          userId: _walletData.user_id,
+          balanceSats: _walletData.balance_sats,
+          pendingBalanceSats: _walletData.pending_balance_sats,
+          escrowBalanceSats: _walletData.escrow_balance_sats,
+          totalEarnedSats: _walletData.total_earned_sats,
+          totalSpentSats: _walletData.total_spent_sats,
+        } as Wallet);
       }
 
       // Load recent transactions
@@ -107,7 +130,7 @@ const Dashboard = () => {
           <div className="card">
             <p className="text-sm text-gray-600 mb-2">Reputation Score</p>
             <p className="text-3xl font-bold text-bitcoin">
-              {profile?.reputationScore.toFixed(1) || '0.0'}
+              {profile?.reputationScore?.toFixed(1) || '0.0'}
             </p>
             <p className="text-sm text-gray-500 mt-1">
               {profile?.totalTransactions || 0} transactions
@@ -164,11 +187,10 @@ const Dashboard = () => {
                       {formatSats(tx.amountSats)}
                     </td>
                     <td className="px-4 py-3 text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        tx.status === 'completed' ? 'bg-green-100 text-green-800' :
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${tx.status === 'completed' ? 'bg-green-100 text-green-800' :
                         tx.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
+                          'bg-red-100 text-red-800'
+                        }`}>
                         {tx.status}
                       </span>
                     </td>

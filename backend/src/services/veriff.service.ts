@@ -1,5 +1,8 @@
 import axios, { AxiosInstance } from 'axios';
 import crypto from 'crypto';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 /**
  * Veriff Service
@@ -12,7 +15,7 @@ class VeriffService {
   private client: AxiosInstance;
 
   constructor() {
-    this.apiKey = process.env.VERIFF_API_KEY || '';
+    this.apiKey = process.env.VERIFF_API_KEY;
     // Use stationapi.veriff.com as specified, fallback to standard endpoint
     this.baseURL = process.env.VERIFF_API_URL || 'https://stationapi.veriff.com/v1';
 

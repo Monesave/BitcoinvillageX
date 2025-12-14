@@ -76,13 +76,13 @@ export interface MarketplaceListing {
   updatedAt: Date;
 }
 
-export type OrderStatus = 
-  | 'pending_payment' 
-  | 'paid' 
-  | 'shipped' 
-  | 'delivered' 
-  | 'completed' 
-  | 'cancelled' 
+export type OrderStatus =
+  | 'pending_payment'
+  | 'paid'
+  | 'shipped'
+  | 'delivered'
+  | 'completed'
+  | 'cancelled'
   | 'disputed';
 
 export interface MarketplaceOrder {
@@ -278,7 +278,13 @@ export interface Review {
 
 // Orukka Ring Types
 export type RingType = 'payment_ring' | 'business_ring';
-export type OrukkaOrderStatus = 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+export type OrukkaOrderStatus =
+  | 'pending'
+  | 'paid'
+  | 'processing'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled';
 
 export interface OrukkaOrder {
   id: string;
@@ -313,4 +319,3 @@ export interface PaginatedResponse<T> {
   pageSize: number;
   totalPages: number;
 }
-

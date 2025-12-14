@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { AppError } from '@shared/utils';
+import dotenv from 'dotenv';
 
 interface StrikeInvoice {
-  invoiceId: string;
+  invoiceId: string;  
   amount: {
     amount: string;
     currency: string;
@@ -36,6 +37,8 @@ interface StrikeQuote {
     targetCurrency: string;
   };
 }
+
+dotenv.config();
 
 class StrikeService {
   private apiKey: string;

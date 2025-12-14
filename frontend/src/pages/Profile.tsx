@@ -3,6 +3,19 @@ import { useAuthStore } from '../store/authStore';
 import { supabase } from '../services/supabase';
 import type { Profile, Wallet } from '@shared/types';
 
+
+// {
+//   "id": "a855967d-5115-474d-9c46-94fdc7d30e5f",
+//   "user_id": "d080b292-9fce-471c-a804-5cc5931eb975",
+//   "balance_sats": 0,
+//   "pending_balance_sats": 0,
+//   "escrow_balance_sats": 0,
+//   "total_earned_sats": 0,
+//   "total_spent_sats": 0,
+//   "created_at": "2025-12-13T15:25:35.624076+00:00",
+//   "updated_at": "2025-12-13T15:25:35.624076+00:00"
+// }
+
 const Profile = () => {
   const { user } = useAuthStore();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -38,7 +51,21 @@ const Profile = () => {
 
       if (data) {
         const profileData = data as any; // Supabase returns database column names
-        setProfile(profileData as Profile);
+        setProfile({
+          id: profileData.id,
+          username: profileData.username,
+          displayName: profileData.display_name,
+          bio: profileData.bio,
+          location: profileData.location,
+          avatarUrl: profileData.avatar_url,
+          isVerifiedVillager: profileData.is_verified_villager,
+          reputationScore: profileData.reputation_score,
+          totalTransactions: profileData.total_transactions,
+          totalVolumeSats: profileData.total_volume_sats,
+          createdAt: profileData.created_at,
+          updatedAt: profileData.updated_at,
+        } as Profile);
+        console.log(profileData)
         setFormData({
           username: profileData.username || '',
           displayName: profileData.display_name || '',
@@ -67,7 +94,17 @@ const Profile = () => {
       if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
 
       if (data) {
-        setWallet(data as Wallet);
+        const walletData = data as any;
+        setWallet({
+          id: walletData.id,
+          userId: walletData.user_id,
+          balanceSats: walletData.balance_sats,
+          pendingBalanceSats: walletData.pending_balance_sats,
+          escrowBalanceSats: walletData.escrow_balance_sats,
+          totalEarnedSats: walletData.total_earned_sats,
+          totalSpentSats: walletData.total_spent_sats,
+        } as Wallet);
+
       }
     } catch (error) {
       console.error('Error loading wallet:', error);
@@ -251,23 +288,23 @@ const Profile = () => {
                 <div>
                   <p className="text-sm text-gray-600">Reputation</p>
                   <p className="text-2xl font-bold text-bitcoin">
-                    {profile.reputationScore.toFixed(1)}
+                    {profile?.reputationScore?.toFixed(1) || '0.0'}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Transactions</p>
-                  <p className="text-2xl font-bold">{profile.totalTransactions}</p>
+                  <p className="text-2xl font-bold">{profile?.totalTransactions || 0}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Volume</p>
                   <p className="text-2xl font-bold">
-                    {(profile.totalVolumeSats / 100_000_000).toFixed(4)} BTC
+                    {(profile?.totalVolumeSats / 100_000_000).toFixed(4)} BTC
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Member Since</p>
                   <p className="text-lg font-semibold">
-                    {new Date(profile.createdAt).toLocaleDateString()}
+                    {new Date(profile?.createdAt).toLocaleDateString()}
                   </p>
                 </div>
               </div>
@@ -283,20 +320,20 @@ const Profile = () => {
               <div>
                 <p className="text-sm text-gray-600 mb-1">Available Balance</p>
                 <p className="text-3xl font-bold text-bitcoin">
-                  {(wallet.balanceSats / 100_000_000).toFixed(8)} BTC
+                  {(wallet?.balanceSats / 100_000_000).toFixed(8)} BTC
                 </p>
-                <p className="text-sm text-gray-500">{wallet.balanceSats.toLocaleString()} sats</p>
+                <p className="text-sm text-gray-500">{wallet?.balanceSats?.toLocaleString()} sats</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600 mb-1">Pending</p>
                 <p className="text-2xl font-semibold">
-                  {(wallet.pendingBalanceSats / 100_000_000).toFixed(8)} BTC
+                  {(wallet?.pendingBalanceSats / 100_000_000).toFixed(8)} BTC
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-600 mb-1">In Escrow</p>
                 <p className="text-2xl font-semibold">
-                  {(wallet.escrowBalanceSats / 100_000_000).toFixed(8)} BTC
+                  {(wallet?.escrowBalanceSats / 100_000_000).toFixed(8)} BTC
                 </p>
               </div>
             </div>
@@ -304,13 +341,13 @@ const Profile = () => {
               <div>
                 <p className="text-sm text-gray-600">Total Earned</p>
                 <p className="text-lg font-semibold">
-                  {(wallet.totalEarnedSats / 100_000_000).toFixed(4)} BTC
+                  {(wallet?.totalEarnedSats / 100_000_000).toFixed(4)} BTC
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Spent</p>
                 <p className="text-lg font-semibold">
-                  {(wallet.totalSpentSats / 100_000_000).toFixed(4)} BTC
+                  {(wallet?.totalSpentSats / 100_000_000).toFixed(4)} BTC
                 </p>
               </div>
             </div>
@@ -320,7 +357,7 @@ const Profile = () => {
         {/* Verification Status */}
         {!profile.isVerifiedVillager && (
           <div className="card mt-8 bg-yellow-50 border-yellow-200">
-            <h3 className="text-lg font-semibold mb-2">Become a Verified Villager</h3>
+            <h3 className="text-lg font-semibold mb-2 text-gray-700">Become a Verified Villager</h3>
             <p className="text-gray-700 mb-4">
               Get verified to unlock higher transaction limits and build more trust in the village.
             </p>
