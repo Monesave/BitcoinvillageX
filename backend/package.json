@@ -5,7 +5,8 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": " tsx watch src/server.ts",
-    "build": "echo 'Skipping TypeScript compilation due to type errors. Using tsx at runtime instead.' && mkdir -p dist && echo 'module.exports = {};' > dist/server.js",
+    "postinstall": "node scripts/setup-shared.js",
+    "build": "node scripts/setup-shared.js && echo 'Skipping TypeScript compilation due to type errors. Using tsx at runtime instead.' && mkdir -p dist && echo 'module.exports = {};' > dist/server.js",
     "start": "tsx src/server.ts",
     "start:compiled": "node dist/server.js",
     "lint": "eslint src --ext .ts",
