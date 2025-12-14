@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { supabase } from '../services/supabase';
 import { createEscrow, releaseEscrow, refundEscrow } from '../services/escrow.service';
-import { AppError, calculateCommission, calculateNetAmount, PLATFORM_FEE_PERCENTAGE } from '@shared/utils';
+import { AppError, calculateCommission, calculateNetAmount, PLATFORM_FEE_PERCENTAGE } from '../../../shared/src/utils';
 
 // ============================================================================
 // BOUNTIES

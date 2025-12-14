@@ -1,6 +1,5 @@
 import { supabase } from './supabase';
-import { calculateCommission, calculateNetAmount, PLATFORM_FEE_PERCENTAGE } from '@shared/utils';
-import { AppError } from '@shared/utils';
+import { calculateCommission, calculateNetAmount, PLATFORM_FEE_PERCENTAGE, AppError } from '../../../shared/src/utils';
 
 interface CreateEscrowParams {
   buyerId: string;

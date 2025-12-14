@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { supabase } from '../services/supabase';
 import { createEscrow, releaseEscrow, refundEscrow } from '../services/escrow.service';
-import { AppError } from '@shared/utils';
+import { AppError } from '../../../shared/src/utils';
 
 // Get all marketplace listings
 export const getListings = async (req: Request, res: Response, next: NextFunction) => {

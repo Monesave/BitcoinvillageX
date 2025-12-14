@@ -1,6 +1,5 @@
 import { strikeService } from './strike.service';
-import { AppError } from '@shared/utils';
-import { btcToSats, satsToBtc } from '@shared/utils';
+import { AppError, btcToSats, satsToBtc } from '../../../shared/src/utils';
 
 interface LightningInvoice {
   invoice: string; // Lightning invoice (lnbc...)

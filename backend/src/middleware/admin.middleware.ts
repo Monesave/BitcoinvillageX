@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { supabase } from '../services/supabase';
-import { AppError } from '@shared/utils';
+import { AppError } from '../../../shared/src/utils';
 
 /**
  * Middleware to check if user is an admin
