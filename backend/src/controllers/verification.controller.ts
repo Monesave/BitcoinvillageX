@@ -23,17 +23,18 @@ export const requestVerification = async (req: Request, res: Response, next: Nex
       .single();
 
     if (existingVerification) {
-      if (existingVerification.status === 'approved') {
+      const existingData = existingVerification as any;
+      if (existingData.status === 'approved') {
         throw new AppError('Villager is already verified', 400, 'ALREADY_VERIFIED');
       }
-      if (existingVerification.status === 'pending') {
+      if (existingData.status === 'pending') {
         // Return existing verification session
         return res.json({
           success: true,
           message: 'Verification already in progress',
           data: {
             verification: existingVerification,
-            paymentRequired: existingVerification.payment_status !== 'completed',
+            paymentRequired: existingData.payment_status !== 'completed',
           },
         });
       }
@@ -100,7 +101,7 @@ export const requestVerification = async (req: Request, res: Response, next: Nex
     }
 
     // Create verification record
-    const { data: verification, error: verificationError } = await supabase
+    const { data: verification, error: verificationError } = await (supabase
       .from('verifications')
       .insert({
         user_id: req.user.id,
@@ -111,7 +112,7 @@ export const requestVerification = async (req: Request, res: Response, next: Nex
         lightning_invoice: lightningInvoice.invoice,
         lightning_payment_hash: lightningPaymentHash,
         payment_status: 'pending',
-      })
+      } as any) as any)
       .select()
       .single();
 
@@ -120,13 +121,19 @@ export const requestVerification = async (req: Request, res: Response, next: Nex
     }
 
     // Create transaction record
+    if (!verification) {
+      throw new AppError('Failed to create verification record', 500, 'DATABASE_ERROR');
+    }
+    
+    const verificationData = verification as any;
     await supabase
       .from('transactions')
+      // @ts-ignore - Supabase type inference issue
       .insert({
         user_id: req.user.id,
         transaction_type: 'verification_fee',
         related_type: 'verification',
-        related_id: verification.id,
+        related_id: verificationData.id,
         amount_sats: paymentAmountSats,
         commission_sats: 0,
         net_amount_sats: paymentAmountSats,
@@ -138,7 +145,7 @@ export const requestVerification = async (req: Request, res: Response, next: Nex
           payment_amount_usd: paymentAmountUsd,
           verriff_session_id: veriffSession.id,
         },
-      });
+      } as any);
 
     res.status(201).json({
       success: true,
@@ -372,6 +379,8 @@ export const veriffWebhook = async (req: Request, res: Response, next: NextFunct
       return res.json({ success: true }); // Return success to Veriff even if not found
     }
 
+    const verificationData = verification as any;
+
     // Update verification status
     const updates: any = {
       status: webhook.status,
@@ -384,17 +393,19 @@ export const veriffWebhook = async (req: Request, res: Response, next: NextFunct
       // Update profile to show verified badge
       await supabase
         .from('profiles')
+        // @ts-ignore - Supabase type inference issue
         .update({
           is_verified_villager: true,
           verification_date: new Date().toISOString(),
-        })
-        .eq('id', verification.user_id);
+        } as any)
+        .eq('id', verificationData.user_id);
     }
 
     await supabase
       .from('verifications')
+      // @ts-ignore - Supabase type inference issue
       .update(updates)
-      .eq('id', verification.id);
+      .eq('id', verificationData.id);
 
     res.json({ success: true });
   } catch (error) {

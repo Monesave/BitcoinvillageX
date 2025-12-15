@@ -816,7 +816,7 @@ export const deactivateCouncilMember = async (req: Request, res: Response, next:
 
     const { data: updated, error: updateError } = await supabase
       .from('council_members')
-      .update({
+      .update<never, any>({
         status: 'inactive',
         notes: reason || 'Deactivated by admin',
       })

@@ -172,7 +172,7 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
       .eq('user_id', req.user.id)
       .single();
 
-    if (!creatorWallet || creatorWallet.balance_sats < rewardSatsNum) {
+    if (!creatorWallet || (creatorWallet as any).balance_sats < rewardSatsNum) {
       throw new AppError('Insufficient balance', 400, 'INSUFFICIENT_BALANCE');
     }
 
@@ -191,17 +191,19 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
       .single();
 
     if (wallet) {
+      const walletData = wallet as any;
       await supabase
         .from('wallets')
+        // @ts-ignore - Supabase type inference issue
         .update({
-          balance_sats: wallet.balance_sats - rewardSatsNum,
-          pending_balance_sats: wallet.pending_balance_sats + rewardSatsNum,
-        })
+          balance_sats: walletData.balance_sats - rewardSatsNum,
+          pending_balance_sats: walletData.pending_balance_sats + rewardSatsNum,
+        } as any)
         .eq('user_id', req.user.id);
     }
 
     // Create transaction record
-    const { data: transaction, error: txError } = await supabase
+    const { data: transaction, error: txError } = await (supabase
       .from('transactions')
       .insert({
         user_id: req.user.id,
@@ -212,26 +214,33 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
         net_amount_sats: rewardSatsNum,
         status: 'pending',
         description: `Bounty reward escrow: ${title}`,
-      })
+      } as any) as any)
       .select()
       .single();
 
     if (txError) {
       // Rollback wallet update
       if (wallet) {
+        const walletData = wallet as any;
         await supabase
           .from('wallets')
+          // @ts-expect-error - Supabase type inference issue
           .update({
-            balance_sats: wallet.balance_sats,
-            pending_balance_sats: wallet.pending_balance_sats,
-          })
+            balance_sats: walletData.balance_sats,
+            pending_balance_sats: walletData.pending_balance_sats,
+          } as any)
           .eq('user_id', req.user.id);
       }
       throw new AppError('Failed to create transaction', 500, 'TRANSACTION_ERROR');
     }
 
     // Create bounty
-    const { data: bounty, error: bountyError } = await supabase
+    if (!transaction) {
+      throw new AppError('Transaction not created', 500, 'TRANSACTION_ERROR');
+    }
+    
+    const transactionData = transaction as any;
+    const { data: bounty, error: bountyError } = await (supabase
       .from('bounties')
       .insert({
         creator_id: req.user.id,
@@ -239,11 +248,11 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
         description,
         category,
         reward_sats: rewardSatsNum,
-        transaction_id: transaction.id,
+        transaction_id: transactionData.id,
         status: 'open',
         max_solvers: maxSolversNum,
         deadline: deadline ? new Date(deadline).toISOString() : null,
-      })
+      } as any) as any)
       .select(`
         *,
         creator:profiles!bounties_creator_id_fkey (
@@ -257,14 +266,16 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
 
     if (bountyError) {
       // Rollback transaction and wallet
-      await supabase.from('transactions').delete().eq('id', transaction.id);
+      await supabase.from('transactions').delete().eq('id', transactionData.id);
       if (wallet) {
+        const walletData = wallet as any;
         await supabase
           .from('wallets')
+          // @ts-expect-error - Supabase type inference issue
           .update({
-            balance_sats: wallet.balance_sats,
-            pending_balance_sats: wallet.pending_balance_sats,
-          })
+            balance_sats: walletData.balance_sats,
+            pending_balance_sats: walletData.pending_balance_sats,
+          } as any)
           .eq('user_id', req.user.id);
       }
       throw new AppError('Failed to create bounty', 500, 'DATABASE_ERROR');
@@ -307,12 +318,13 @@ export const updateBounty = async (req: Request, res: Response, next: NextFuncti
       throw new AppError('Bounty not found', 404, 'BOUNTY_NOT_FOUND');
     }
 
-    if (existingBounty.creator_id !== req.user.id) {
+    const bountyData = existingBounty as any;
+    if (bountyData.creator_id !== req.user.id) {
       throw new AppError('Not authorized to update this bounty', 403, 'FORBIDDEN');
     }
 
     // Can't update closed or awarded bounties
-    if (existingBounty.status === 'closed' || existingBounty.status === 'awarded') {
+    if (bountyData.status === 'closed' || bountyData.status === 'awarded') {
       throw new AppError('Cannot update closed or awarded bounty', 400, 'INVALID_BOUNTY_STATUS');
     }
 
@@ -328,7 +340,8 @@ export const updateBounty = async (req: Request, res: Response, next: NextFuncti
 
     const { data: bounty, error } = await supabase
       .from('bounties')
-      .update(updates)
+      // @ts-expect-error - Supabase type inference issue
+      .update(updates as any)
       .eq('id', id)
       .select(`
         *,
@@ -375,11 +388,12 @@ export const closeBounty = async (req: Request, res: Response, next: NextFunctio
       throw new AppError('Bounty not found', 404, 'BOUNTY_NOT_FOUND');
     }
 
-    if (bounty.creator_id !== req.user.id) {
+    const bountyData = bounty as any;
+    if (bountyData.creator_id !== req.user.id) {
       throw new AppError('Only creator can close bounty', 403, 'FORBIDDEN');
     }
 
-    if (bounty.status === 'closed' || bounty.status === 'awarded') {
+    if (bountyData.status === 'closed' || bountyData.status === 'awarded') {
       throw new AppError('Bounty already closed or awarded', 400, 'INVALID_BOUNTY_STATUS');
     }
 
@@ -394,7 +408,7 @@ export const closeBounty = async (req: Request, res: Response, next: NextFunctio
     }
 
     // Refund the reward to creator
-    const transaction = bounty.transaction as any;
+    const transaction = bountyData.transaction as any;
     if (transaction && transaction.status === 'pending') {
       const { data: wallet } = await supabase
         .from('wallets')
@@ -403,29 +417,33 @@ export const closeBounty = async (req: Request, res: Response, next: NextFunctio
         .single();
 
       if (wallet) {
+        const walletData = wallet as any;
         await supabase
           .from('wallets')
+          // @ts-expect-error - Supabase type inference issue
           .update({
-            balance_sats: wallet.balance_sats + bounty.reward_sats,
-            pending_balance_sats: wallet.pending_balance_sats - bounty.reward_sats,
-          })
+            balance_sats: walletData.balance_sats + bountyData.reward_sats,
+            pending_balance_sats: walletData.pending_balance_sats - bountyData.reward_sats,
+          } as any)
           .eq('user_id', req.user.id);
       }
 
       // Update transaction status
       await supabase
         .from('transactions')
+        // @ts-ignore - Supabase type inference issue
         .update({
           status: 'cancelled',
           description: 'Bounty closed - refunded',
-        })
+        } as any)
         .eq('id', transaction.id);
     }
 
     // Update bounty status
     await supabase
       .from('bounties')
-      .update({ status: 'closed' })
+      // @ts-expect-error - Supabase type inference issue
+      .update({ status: 'closed' } as any)
       .eq('id', id);
 
     res.json({
@@ -466,12 +484,13 @@ export const createSubmission = async (req: Request, res: Response, next: NextFu
       throw new AppError('Bounty not found', 404, 'BOUNTY_NOT_FOUND');
     }
 
-    if (bounty.status !== 'open') {
+    const bountyData = bounty as any;
+    if (bountyData.status !== 'open') {
       throw new AppError('Bounty is not open for submissions', 400, 'BOUNTY_NOT_OPEN');
     }
 
     // Check deadline
-    if (bounty.deadline && new Date(bounty.deadline) < new Date()) {
+    if (bountyData.deadline && new Date(bountyData.deadline) < new Date()) {
       throw new AppError('Bounty deadline has passed', 400, 'BOUNTY_DEADLINE_PASSED');
     }
 
@@ -488,7 +507,7 @@ export const createSubmission = async (req: Request, res: Response, next: NextFu
     }
 
     // Create submission
-    const { data: submission, error: submissionError } = await supabase
+    const { data: submission, error: submissionError } = await (supabase
       .from('bounty_submissions')
       .insert({
         bounty_id: bountyId,
@@ -496,7 +515,7 @@ export const createSubmission = async (req: Request, res: Response, next: NextFu
         submission_text: submissionText,
         submission_files: Array.isArray(submissionFiles) ? submissionFiles : [],
         status: 'pending',
-      })
+      } as any) as any)
       .select(`
         *,
         solver:profiles!bounty_submissions_solver_id_fkey (
@@ -552,9 +571,10 @@ export const getSubmission = async (req: Request, res: Response, next: NextFunct
       throw new AppError('Submission not found', 404, 'SUBMISSION_NOT_FOUND');
     }
 
-    const bounty = submission.bounty as any;
+    const submissionData = submission as any;
+    const bounty = submissionData.bounty as any;
     // Verify user is creator or solver
-    if (bounty.creator_id !== req.user.id && submission.solver_id !== req.user.id) {
+    if (bounty?.creator_id !== req.user.id && submissionData.solver_id !== req.user.id) {
       throw new AppError('Not authorized to view this submission', 403, 'FORBIDDEN');
     }
 
@@ -583,7 +603,8 @@ export const getBountySubmissions = async (req: Request, res: Response, next: Ne
       .eq('id', bountyId)
       .single();
 
-    if (!bounty || bounty.creator_id !== req.user.id) {
+    const bountyData = bounty as any;
+    if (!bounty || bountyData.creator_id !== req.user.id) {
       throw new AppError('Only creator can view submissions', 403, 'FORBIDDEN');
     }
 
@@ -645,11 +666,12 @@ export const awardBounty = async (req: Request, res: Response, next: NextFunctio
       throw new AppError('Bounty not found', 404, 'BOUNTY_NOT_FOUND');
     }
 
-    if (bounty.creator_id !== req.user.id) {
+    const bountyData = bounty as any;
+    if (bountyData.creator_id !== req.user.id) {
       throw new AppError('Only creator can award bounty', 403, 'FORBIDDEN');
     }
 
-    if (bounty.status === 'closed' || bounty.status === 'awarded') {
+    if (bountyData.status === 'closed' || bountyData.status === 'awarded') {
       throw new AppError('Bounty already closed or awarded', 400, 'INVALID_BOUNTY_STATUS');
     }
 
@@ -683,37 +705,38 @@ export const awardBounty = async (req: Request, res: Response, next: NextFunctio
       .select('id')
       .eq('bounty_id', bountyId);
 
-    if ((existingAwards?.length || 0) >= bounty.max_solvers) {
+    if ((existingAwards?.length || 0) >= bountyData.max_solvers) {
       throw new AppError('Maximum number of awards reached', 400, 'MAX_AWARDS_REACHED');
     }
 
     // Create transaction and escrow for the award
     // Note: Funds are already locked in creator's pending_balance from bounty creation
-    const transaction = bounty.transaction as any;
+    const transaction = bountyData.transaction as any;
     
     // Calculate commission and net amount
-    const commissionSats = calculateCommission(bounty.reward_sats, PLATFORM_FEE_PERCENTAGE);
-    const netAmountSats = calculateNetAmount(bounty.reward_sats, PLATFORM_FEE_PERCENTAGE);
+    const commissionSats = calculateCommission(bountyData.reward_sats, PLATFORM_FEE_PERCENTAGE);
+    const netAmountSats = calculateNetAmount(bountyData.reward_sats, PLATFORM_FEE_PERCENTAGE);
 
+    const submissionData = submission as any;
     // Create award transaction (seller receives the reward)
-    const { data: awardTransaction, error: txError } = await supabase
+    const { data: awardTransaction, error: txError } = await (supabase
       .from('transactions')
       .insert({
-        user_id: submission.solver_id,
+        user_id: submissionData.solver_id,
         transaction_type: 'bounty_award',
         related_type: 'bounty',
         related_id: bountyId,
-        amount_sats: bounty.reward_sats,
+        amount_sats: bountyData.reward_sats,
         commission_sats: commissionSats,
         net_amount_sats: netAmountSats,
         status: 'completed',
-        description: `Bounty award: ${bounty.title}`,
+        description: `Bounty award: ${bountyData.title}`,
         completed_at: new Date().toISOString(),
-      })
+      } as any) as any)
       .select()
       .single();
 
-    if (txError) {
+    if (txError || !awardTransaction) {
       throw new AppError('Failed to create award transaction', 500, 'TRANSACTION_ERROR');
     }
 
@@ -721,23 +744,24 @@ export const awardBounty = async (req: Request, res: Response, next: NextFunctio
     const autoReleaseAt = new Date();
     autoReleaseAt.setDate(autoReleaseAt.getDate() + 7);
 
-    const { data: escrow, error: escrowError } = await supabase
+    const awardTransactionData = awardTransaction as any;
+    const { data: escrow, error: escrowError } = await (supabase
       .from('escrow_accounts')
       .insert({
-        transaction_id: awardTransaction.id,
+        transaction_id: awardTransactionData.id,
         buyer_id: req.user.id,
-        seller_id: submission.solver_id,
+        seller_id: submissionData.solver_id,
         amount_sats: netAmountSats,
         status: 'released', // Immediately released
         released_at: new Date().toISOString(),
         auto_release_at: autoReleaseAt.toISOString(),
-      })
+      } as any) as any)
       .select()
       .single();
 
     if (escrowError) {
       // Rollback transaction
-      await supabase.from('transactions').delete().eq('id', awardTransaction.id);
+      await supabase.from('transactions').delete().eq('id', awardTransactionData.id);
       throw new AppError('Failed to create escrow', 500, 'ESCROW_ERROR');
     }
 
@@ -751,63 +775,69 @@ export const awardBounty = async (req: Request, res: Response, next: NextFunctio
     const { data: solverWallet } = await supabase
       .from('wallets')
       .select('*')
-      .eq('user_id', submission.solver_id)
+      .eq('user_id', submissionData.solver_id)
       .single();
 
     if (creatorWallet) {
+      const creatorWalletData = creatorWallet as any;
       await supabase
         .from('wallets')
+        // @ts-ignore - Supabase type inference issue
         .update({
-          pending_balance_sats: creatorWallet.pending_balance_sats - bounty.reward_sats,
-        })
+          pending_balance_sats: creatorWalletData.pending_balance_sats - bountyData.reward_sats,
+        } as any)
         .eq('user_id', req.user.id);
     }
 
     if (solverWallet) {
+      const solverWalletData = solverWallet as any;
       await supabase
         .from('wallets')
+        // @ts-ignore - Supabase type inference issue
         .update({
-          balance_sats: solverWallet.balance_sats + netAmountSats,
-          total_earned_sats: solverWallet.total_earned_sats + netAmountSats,
-        })
-        .eq('user_id', submission.solver_id);
+          balance_sats: solverWalletData.balance_sats + netAmountSats,
+          total_earned_sats: solverWalletData.total_earned_sats + netAmountSats,
+        } as any)
+        .eq('user_id', submissionData.solver_id);
     } else {
       // Create wallet if doesn't exist
       await supabase
         .from('wallets')
+        // @ts-ignore - Supabase type inference issue
         .insert({
-          user_id: submission.solver_id,
+          user_id: submissionData.solver_id,
           balance_sats: netAmountSats,
           total_earned_sats: netAmountSats,
-        });
+        } as any);
     }
 
     // Create commission transaction for platform
     if (commissionSats > 0) {
+      // @ts-ignore - Supabase type inference issue
       await supabase.from('transactions').insert({
-        user_id: submission.solver_id,
-        transaction_type: 'commission',
-        related_type: 'bounty',
-        related_id: bountyId,
-        amount_sats: commissionSats,
-        commission_sats: 0,
-        net_amount_sats: commissionSats,
-        status: 'completed',
-        description: 'Platform commission',
-        completed_at: new Date().toISOString(),
-      });
+          user_id: submissionData.solver_id,
+          transaction_type: 'commission',
+          related_type: 'bounty',
+          related_id: bountyId,
+          amount_sats: commissionSats,
+          commission_sats: 0,
+          net_amount_sats: commissionSats,
+          status: 'completed',
+          description: 'Platform commission',
+          completed_at: new Date().toISOString(),
+        } as any);
     }
 
     // Create award record
-    const { data: award, error: awardError } = await supabase
+    const { data: award, error: awardError } = await (supabase
       .from('bounty_awards')
       .insert({
         bounty_id: bountyId,
         submission_id: submissionId,
-        solver_id: submission.solver_id,
-        transaction_id: awardTransaction.id,
-        reward_sats: bounty.reward_sats,
-      })
+        solver_id: submissionData.solver_id,
+        transaction_id: awardTransactionData.id,
+        reward_sats: bountyData.reward_sats,
+      } as any) as any)
       .select()
       .single();
 
@@ -819,29 +849,38 @@ export const awardBounty = async (req: Request, res: Response, next: NextFunctio
     // Update submission status
     await supabase
       .from('bounty_submissions')
-      .update({ status: 'awarded' })
+      // @ts-expect-error - Supabase type inference issue
+      .update({ status: 'awarded' } as any)
       .eq('id', submissionId);
 
     // Update original bounty transaction status
     if (transaction && transaction.status === 'pending') {
+      const transactionData = transaction as any;
       await supabase
         .from('transactions')
+        // @ts-ignore - Supabase type inference issue
         .update({
           status: 'completed',
           description: `Bounty awarded to solver`,
-        })
-        .eq('id', transaction.id);
+        } as any)
+        .eq('id', transactionData.id);
     }
 
     // Update bounty status if max solvers reached
-    if ((existingAwards?.length || 0) + 1 >= bounty.max_solvers) {
+    if ((existingAwards?.length || 0) + 1 >= bountyData.max_solvers) {
       await supabase
         .from('bounties')
-        .update({ status: 'awarded' })
+        // @ts-ignore - Supabase type inference issue
+        .update({ status: 'awarded' } as any)
         .eq('id', bountyId);
     }
 
     // Get full award with related data
+    if (!award) {
+      throw new AppError('Failed to create award', 500, 'DATABASE_ERROR');
+    }
+    
+    const awardData = award as any;
     const { data: fullAward } = await supabase
       .from('bounty_awards')
       .select(`
@@ -854,7 +893,7 @@ export const awardBounty = async (req: Request, res: Response, next: NextFunctio
           avatar_url
         )
       `)
-      .eq('id', award.id)
+      .eq('id', awardData.id)
       .single();
 
     res.json({

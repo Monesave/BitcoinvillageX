@@ -131,7 +131,7 @@ export const getCurrentUser = async (req: Request, res: Response, next: NextFunc
       success: true,
       data: {
         user: {
-          ...profile,
+          ...(profile as any),
           wallet: wallet || null,
         },
       },
