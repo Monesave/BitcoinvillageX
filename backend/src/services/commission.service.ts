@@ -1,4 +1,4 @@
-import { calculateCommission, calculateNetAmount, PLATFORM_FEE_PERCENTAGE } from '@bitcoinvillagex/shared';
+import { calculateCommission, calculateNetAmount, PLATFORM_FEE_PERCENTAGE } from "../../shared/src/utils";
 
 /**
  * Calculate platform commission for a transaction
