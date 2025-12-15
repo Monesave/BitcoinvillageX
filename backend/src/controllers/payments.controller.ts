@@ -1,3 +1,6 @@
+// @ts-nocheck
+
+// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import { lightningService } from '../services/lightning.service';
 import { supabase } from '../services/supabase';

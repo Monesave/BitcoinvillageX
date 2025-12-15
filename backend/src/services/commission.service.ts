@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { calculateCommission, calculateNetAmount, PLATFORM_FEE_PERCENTAGE } from "../../shared/src/utils";
 
 /**

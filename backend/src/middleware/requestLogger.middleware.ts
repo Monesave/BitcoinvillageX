@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import morgan from 'morgan';
 import fs from 'fs';

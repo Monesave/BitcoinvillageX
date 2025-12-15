@@ -6,7 +6,7 @@
   "scripts": {
     "dev": " tsx watch src/server.ts",
     "postinstall": "node scripts/setup-shared.js",
-    "build": "node scripts/setup-shared.js && tsc --skipLibCheck || true",
+    "build": "tsc --noEmitOnError false --pretty false",
     "start": "tsx src/server.ts",
     "start:compiled": "node dist/server.js",
     "lint": "eslint src --ext .ts",
