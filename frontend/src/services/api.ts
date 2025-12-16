@@ -165,5 +165,85 @@ export const servicesAPI = {
   },
 };
 
+// Crowdfunding API methods
+export const crowdfundingAPI = {
+  getCampaigns: async (params?: {
+    category?: string;
+    status?: string;
+    featured?: string;
+    search?: string;
+    minGoal?: number;
+    maxGoal?: number;
+    page?: number;
+    limit?: number;
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.category) queryParams.append('category', params.category);
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.featured) queryParams.append('featured', params.featured);
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.minGoal) queryParams.append('minGoal', params.minGoal.toString());
+    if (params?.maxGoal) queryParams.append('maxGoal', params.maxGoal.toString());
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    
+    const response = await api.get(`/crowdfunding/campaigns?${queryParams.toString()}`);
+    return response.data;
+  },
+
+  getCampaign: async (id: string) => {
+    const response = await api.get(`/crowdfunding/campaigns/${id}`);
+    return response.data;
+  },
+
+  createCampaign: async (data: any) => {
+    const response = await api.post('/crowdfunding/campaigns', data);
+    return response.data;
+  },
+
+  updateCampaign: async (id: string, data: any) => {
+    const response = await api.put(`/crowdfunding/campaigns/${id}`, data);
+    return response.data;
+  },
+
+  deleteCampaign: async (id: string) => {
+    const response = await api.delete(`/crowdfunding/campaigns/${id}`);
+    return response.data;
+  },
+
+  createDonation: async (campaignId: string, data: any) => {
+    const response = await api.post(`/crowdfunding/campaigns/${campaignId}/donations`, data);
+    return response.data;
+  },
+
+  getCampaignDonations: async (campaignId: string, params?: { page?: number; limit?: number }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    
+    const response = await api.get(`/crowdfunding/campaigns/${campaignId}/donations?${queryParams.toString()}`);
+    return response.data;
+  },
+
+  getMyDonations: async (params?: { page?: number; limit?: number }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    
+    const response = await api.get(`/crowdfunding/donations/my/list?${queryParams.toString()}`);
+    return response.data;
+  },
+
+  getMyCampaigns: async (params?: { status?: string; page?: number; limit?: number }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    
+    const response = await api.get(`/crowdfunding/campaigns/my/list?${queryParams.toString()}`);
+    return response.data;
+  },
+};
+
 export default api;
 
