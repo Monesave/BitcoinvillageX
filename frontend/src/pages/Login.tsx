@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../services/supabase';
+import { supabase, isSupabaseConfigured } from '../services/supabase';
 import { useAuthStore } from '../store/authStore';
 import StarField from '../components/common/StarField';
 
@@ -9,8 +9,45 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resendingConfirmation, setResendingConfirmation] = useState(false);
+  const [confirmationSent, setConfirmationSent] = useState(false);
   const navigate = useNavigate();
   const { setUser } = useAuthStore();
+
+  // Check Supabase configuration on mount
+  useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setError('Supabase is not properly configured. Please check your environment variables (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY).');
+    }
+  }, []);
+
+  const handleResendConfirmation = async () => {
+    if (!email) {
+      setError('Please enter your email address first');
+      return;
+    }
+
+    setResendingConfirmation(true);
+    setError(null);
+
+    try {
+      const { error: resendError } = await supabase.auth.resend({
+        type: 'signup',
+        email: email.trim(),
+      });
+
+      if (resendError) {
+        setError(resendError.message || 'Failed to resend confirmation email');
+      } else {
+        setConfirmationSent(true);
+        setError(null);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to resend confirmation email');
+    } finally {
+      setResendingConfirmation(false);
+    }
+  };
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,17 +55,49 @@ const Login = () => {
     setError(null);
 
     try {
+      // Log for debugging
+      console.log('Attempting login with email:', email);
+      console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
+
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase login error:', error);
+        
+        // Provide more helpful error messages based on error type
+        let errorMessage = error.message || 'An error occurred during login';
+        
+        if (error.message === 'Invalid login credentials' || error.message.includes('Invalid login credentials')) {
+          errorMessage = 'Invalid email or password. Please check your credentials and try again. If you just signed up, you may need to confirm your email first.';
+        } else if (error.message.includes('Email not confirmed') || error.message.includes('email_not_confirmed')) {
+          errorMessage = 'Please check your email and click the confirmation link before signing in.';
+        } else if (error.message.includes('User not found')) {
+          errorMessage = 'No account found with this email. Please sign up first.';
+        } else if (error.message.includes('Too many requests')) {
+          errorMessage = 'Too many login attempts. Please wait a few minutes and try again.';
+        }
+        
+        setError(errorMessage);
+        return;
+      }
 
+      if (!data.user) {
+        console.error('Login succeeded but no user data returned');
+        setError('Login failed: No user data returned. Please try again.');
+        return;
+      }
+
+      console.log('Login successful, user:', data.user.id);
       setUser(data.user);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'An error occurred during login');
+      console.error('Unexpected login error:', err);
+      // Show the actual error message for debugging
+      const errorMessage = err.message || err.error_description || 'An unexpected error occurred during login';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -86,9 +155,34 @@ const Login = () => {
             {/* Error Message */}
             {error && (
               <div className="mb-6 p-4 bg-red-900/30 border border-red-500/50 rounded-xl backdrop-blur-sm">
-                <div className="flex items-center space-x-2 text-red-300">
+                <div className="flex items-start space-x-2 text-red-300">
                   <span className="text-lg">⚠️</span>
-                  <p className="text-sm">{error}</p>
+                  <div className="flex-1">
+                    <p className="text-sm">{error}</p>
+                    {(error.includes('confirm your email') || error.includes('Email not confirmed')) && email && (
+                      <button
+                        onClick={handleResendConfirmation}
+                        disabled={resendingConfirmation || confirmationSent}
+                        className="mt-2 text-xs text-red-200 hover:text-red-100 underline disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {confirmationSent 
+                          ? '✓ Confirmation email sent! Check your inbox.' 
+                          : resendingConfirmation 
+                          ? 'Sending...' 
+                          : 'Resend confirmation email'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Success Message for Confirmation */}
+            {confirmationSent && !error && (
+              <div className="mb-6 p-4 bg-green-900/30 border border-green-500/50 rounded-xl backdrop-blur-sm">
+                <div className="flex items-center space-x-2 text-green-300">
+                  <span className="text-lg">✓</span>
+                  <p className="text-sm">Confirmation email sent! Please check your inbox and click the confirmation link.</p>
                 </div>
               </div>
             )}
